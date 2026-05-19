@@ -689,3 +689,7 @@ Your PHP_Laravel12_Dynamic_Server Project is now ready!
 
 
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> development
