@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Add Server</title>
+<title>Edit Server</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:#020617;color:#fff;font-family:system-ui,-apple-system,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
@@ -17,7 +17,7 @@ input:focus,select:focus{border-color:#4f46e5}
 select option{background:#0f172a}
 .btn{display:inline-block;padding:10px 18px;border-radius:10px;font-weight:600;font-size:.9rem;cursor:pointer;border:none;color:#fff;transition:opacity .15s;text-decoration:none}
 .btn:hover{opacity:.85}
-.btn-indigo{background:#4f46e5}
+.btn-yellow{background:#a16207}
 .btn-slate{background:#334155}
 .btn-submit{width:100%;margin-top:20px;padding:12px;font-size:1rem}
 .errors{background:rgba(185,28,28,.15);border:1px solid rgba(185,28,28,.3);color:#f87171;padding:12px 16px;border-radius:10px;margin-bottom:16px;font-size:.85rem}
@@ -27,16 +27,16 @@ select option{background:#0f172a}
 <body>
 <div class="card">
     <div class="card-hdr">
-        <h1>➕ Add New Server</h1>
+        <h1>✏️ Edit Server</h1>
         <a href="{{ route('servers.index') }}" class="btn btn-slate">← Back</a>
     </div>
     @if($errors->any())
     <div class="errors"><ul>@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul></div>
     @endif
-    <form action="{{ route('servers.store') }}" method="POST">
-        @csrf
+    <form action="{{ route('servers.update', $server->id) }}" method="POST">
+        @csrf @method('PUT')
         @include('servers._form')
-        <button type="submit" class="btn btn-indigo btn-submit">Add Server</button>
+        <button type="submit" class="btn btn-yellow btn-submit">Update Server</button>
     </form>
 </div>
 </body>
