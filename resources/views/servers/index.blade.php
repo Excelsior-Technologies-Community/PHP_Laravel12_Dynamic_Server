@@ -1,321 +1,219 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dynamic Server Dashboard</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dynamic Server Dashboard</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#020617;color:#fff;font-family:system-ui,-apple-system,sans-serif;min-height:100vh}
+a{text-decoration:none;color:inherit}
+.wrap{max-width:1280px;margin:0 auto;padding:24px 20px}
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+/* cards */
+.card{background:#0f172a;border:1px solid #1e293b;border-radius:16px;padding:20px}
+.card-sm{background:#0f172a;border:1px solid #1e293b;border-radius:12px;padding:16px}
 
-    <style>
-        body {
-            background:
-                radial-gradient(circle at top left, #312e81, transparent 25%),
-                radial-gradient(circle at bottom right, #0f172a, transparent 35%),
-                #020617;
-        }
+/* header */
+.hdr{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px}
+.hdr h1{font-size:1.6rem;font-weight:900;letter-spacing:-.5px}
+.hdr p{color:#64748b;font-size:.85rem;margin-top:4px}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap}
 
-        .glass {
-            background: rgba(15, 23, 42, 0.65);
-            backdrop-filter: blur(18px);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-        }
+/* buttons */
+.btn{display:inline-block;padding:9px 18px;border-radius:10px;font-weight:600;font-size:.85rem;cursor:pointer;border:none;color:#fff;transition:opacity .15s}
+.btn:hover{opacity:.85}
+.btn-indigo{background:#4f46e5}
+.btn-slate{background:#334155}
+.btn-green{background:#15803d}
+.btn-blue{background:#1d4ed8}
+.btn-yellow{background:#a16207}
+.btn-red{background:#b91c1c}
+.btn-sm{padding:6px 12px;font-size:.78rem;border-radius:8px}
 
-        .table-hover:hover {
-            background: rgba(99, 102, 241, 0.08);
-        }
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+@media(max-width:640px){.stats{grid-template-columns:repeat(2,1fr)}}
+.stat-label{color:#64748b;font-size:.7rem;text-transform:uppercase;letter-spacing:.08em}
+.stat-val{font-size:2.2rem;font-weight:900;margin-top:6px}
 
-        ::-webkit-scrollbar {
-            height: 8px;
-            width: 8px;
-        }
+/* search */
+.search-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+.search-row input,.search-row select{background:#0f172a;border:1px solid #334155;border-radius:10px;padding:9px 14px;color:#fff;font-size:.9rem;outline:none;flex:1;min-width:180px}
+.search-row input:focus,.search-row select:focus{border-color:#4f46e5}
+.search-row select option{background:#0f172a}
 
-        ::-webkit-scrollbar-thumb {
-            background: #4f46e5;
-            border-radius: 10px;
-        }
-    </style>
+/* table */
+.tbl-wrap{background:#0f172a;border:1px solid #1e293b;border-radius:16px;overflow:hidden}
+.tbl-scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.875rem}
+thead{background:#0a1628}
+th{padding:11px 16px;text-align:left;color:#94a3b8;font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
+td{padding:11px 16px;border-top:1px solid #1e293b;vertical-align:middle}
+tr:hover td{background:rgba(99,102,241,.06)}
+.server-name{font-weight:700;color:#818cf8}
+.server-user{font-size:.75rem;color:#475569;margin-top:2px}
+.actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+
+/* tag badges */
+.tag{display:inline-block;padding:2px 10px;border-radius:999px;font-size:.72rem;font-weight:700;border:1px solid}
+.tag-red{background:rgba(185,28,28,.15);color:#f87171;border-color:rgba(185,28,28,.3)}
+.tag-yellow{background:rgba(161,98,7,.15);color:#fbbf24;border-color:rgba(161,98,7,.3)}
+.tag-blue{background:rgba(29,78,216,.15);color:#60a5fa;border-color:rgba(29,78,216,.3)}
+.tag-purple{background:rgba(109,40,217,.15);color:#c084fc;border-color:rgba(109,40,217,.3)}
+.tag-pink{background:rgba(157,23,77,.15);color:#f472b6;border-color:rgba(157,23,77,.3)}
+.tag-slate{background:rgba(51,65,85,.3);color:#94a3b8;border-color:rgba(51,65,85,.5)}
+
+/* status */
+.status-dot{font-size:.78rem;font-weight:700;cursor:pointer;padding:4px 10px;border-radius:999px;border:1px solid #334155;background:#1e293b;display:inline-block}
+.status-online{color:#4ade80;border-color:rgba(74,222,128,.3);background:rgba(74,222,128,.08)}
+.status-offline{color:#f87171;border-color:rgba(248,113,113,.3);background:rgba(248,113,113,.08)}
+
+/* pagination */
+.pagination{margin-top:16px}
+.pagination nav{display:flex;gap:6px;flex-wrap:wrap}
+.pagination .page-link{background:#0f172a;border:1px solid #1e293b;color:#94a3b8;padding:6px 12px;border-radius:8px;font-size:.85rem}
+.pagination .page-link:hover{border-color:#4f46e5;color:#fff}
+.pagination .active .page-link{background:#4f46e5;border-color:#4f46e5;color:#fff}
+
+/* alert */
+.alert{padding:12px 16px;border-radius:10px;margin-bottom:16px;font-size:.9rem}
+.alert-success{background:rgba(21,128,61,.15);border:1px solid rgba(21,128,61,.3);color:#4ade80}
+.alert-error{background:rgba(185,28,28,.15);border:1px solid rgba(185,28,28,.3);color:#f87171}
+
+/* empty */
+.empty{text-align:center;padding:48px;color:#475569;font-size:1rem}
+</style>
 </head>
+<body>
+<div class="wrap">
 
-<body class="text-white min-h-screen">
-
-    <div class="container mx-auto px-5 py-6">
-
-        {{-- Small Header --}}
-        <div class="glass rounded-2xl px-6 py-4 mb-6 shadow-2xl">
-
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-
-                <div>
-                    <h1 class="text-2xl md:text-3xl font-black tracking-tight">
-                        🚀 Dynamic Server Dashboard
-                    </h1>
-
-                    <p class="text-slate-400 text-sm mt-1">
-                        Laravel 12 Dynamic Database Manager
-                    </p>
-                </div>
-
-                <a href="{{ route('servers.create') }}"
-                    class="bg-indigo-600 hover:bg-indigo-700 transition duration-300 px-5 py-3 rounded-xl font-semibold shadow-lg shadow-indigo-500/20">
-                    + Add Server
-                </a>
-
-            </div>
-
+    {{-- Header --}}
+    <div class="hdr">
+        <div>
+            <h1>🚀 Dynamic Server Dashboard</h1>
+            <p>Laravel 12 Dynamic Database Manager</p>
         </div>
-
-        {{-- Stats --}}
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
-
-            <div class="glass rounded-2xl p-5 shadow-xl">
-
-                <div class="flex items-center justify-between">
-
-                    <div>
-                        <p class="text-slate-400 text-xs uppercase tracking-widest">
-                            Total Servers
-                        </p>
-
-                        <h2 class="text-4xl font-black mt-2 text-indigo-400">
-                            {{ $totalServers }}
-                        </h2>
-                    </div>
-
-                    <div class="text-5xl opacity-20">
-                        🖥️
-                    </div>
-
-                </div>
-
-            </div>
-
-            <div class="glass rounded-2xl p-5 shadow-xl">
-
-                <div class="flex items-center justify-between">
-
-                    <div>
-                        <p class="text-slate-400 text-xs uppercase tracking-widest">
-                            Active Connections
-                        </p>
-
-                        <h2 class="text-4xl font-black mt-2 text-green-400">
-                            {{ $totalServers }}
-                        </h2>
-                    </div>
-
-                    <div class="text-5xl opacity-20">
-                        ⚡
-                    </div>
-
-                </div>
-
-            </div>
-
-            <div class="glass rounded-2xl p-5 shadow-xl">
-
-                <div class="flex items-center justify-between">
-
-                    <div>
-                        <p class="text-slate-400 text-xs uppercase tracking-widest">
-                            Status
-                        </p>
-
-                        <h2 class="text-3xl font-black mt-2 text-pink-400">
-                            ONLINE
-                        </h2>
-                    </div>
-
-                    <div class="text-5xl opacity-20">
-                        🔥
-                    </div>
-
-                </div>
-
-            </div>
-
+        <div class="btn-row">
+            <a href="{{ route('servers.logs') }}" class="btn btn-slate">📋 Logs</a>
+            <a href="{{ route('servers.create') }}" class="btn btn-indigo">+ Add Server</a>
         </div>
-
-        {{-- Search --}}
-        <div class="glass rounded-2xl p-5 mb-6 shadow-xl">
-
-            <form method="GET" action="{{ route('servers.index') }}">
-
-                <div class="flex flex-col md:flex-row gap-4">
-
-                    <input type="text" name="search" value="{{ request('search') }}"
-                        placeholder="🔍 Search server name, host or database..."
-                        class="w-full bg-slate-950/70 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-
-                    <button type="submit"
-                        class="bg-indigo-600 hover:bg-indigo-700 transition duration-300 px-6 py-3 rounded-xl font-semibold">
-                        Search
-                    </button>
-
-                </div>
-
-            </form>
-
-        </div>
-
-        {{-- Table --}}
-        <div class="glass rounded-2xl overflow-hidden shadow-2xl">
-
-            <div class="overflow-x-auto">
-
-                <table class="w-full">
-
-                    <thead class="bg-slate-900/80 text-slate-300 uppercase text-sm">
-
-                        <tr>
-                            <th class="px-6 py-4 text-left">#</th>
-                            <th class="px-6 py-4 text-left">Server</th>
-                            <th class="px-6 py-4 text-left">Host</th>
-                            <th class="px-6 py-4 text-left">Database</th>
-                            <th class="px-6 py-4 text-left">Username</th>
-                            <th class="px-6 py-4 text-center">Status</th>
-                            <th class="px-6 py-4 text-center">Actions</th>
-                        </tr>
-
-                    </thead>
-
-                    <tbody>
-
-                        @forelse($servers as $server)
-
-                            <tr class="border-t border-slate-800 table-hover transition duration-300">
-
-                                <td class="px-6 py-4 font-semibold text-slate-400">
-                                    #{{ $server->id }}
-                                </td>
-
-                                <td class="px-6 py-4">
-
-                                    <div class="flex items-center gap-3">
-
-                                        <div
-                                            class="h-11 w-11 rounded-xl bg-indigo-500/20 flex items-center justify-center text-xl">
-                                            🖥️
-                                        </div>
-
-                                        <div>
-                                            <h2 class="font-bold text-indigo-400">
-                                                {{ $server->name }}
-                                            </h2>
-
-                                            <p class="text-xs text-slate-500">
-                                                Dynamic Database Server
-                                            </p>
-                                        </div>
-
-                                    </div>
-
-                                </td>
-
-                                <td class="px-6 py-4 text-slate-300">
-                                    {{ $server->host }}
-                                </td>
-
-                                <td class="px-6 py-4 text-slate-300">
-                                    {{ $server->database }}
-                                </td>
-
-                                <td class="px-6 py-4 text-slate-300">
-                                    {{ $server->username }}
-                                </td>
-
-                                <td class="px-6 py-4 text-center">
-
-                                    <span
-                                        class="bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-xs font-bold border border-green-500/20">
-                                        ● ACTIVE
-                                    </span>
-
-                                </td>
-
-                                <td class="px-6 py-4">
-
-                                    <div class="flex justify-center gap-3">
-
-                                        <a href="{{ route('servers.connect', $server->id) }}"
-                                            class="bg-green-600 hover:bg-green-700 transition duration-300 px-4 py-2 rounded-lg text-sm font-semibold shadow-lg">
-                                            Connect
-                                        </a>
-
-                                        <form action="{{ route('servers.destroy', $server->id) }}" method="POST">
-
-                                            @csrf
-                                            @method('DELETE')
-
-                                            <button onclick="return confirm('Delete this server?')"
-                                                class="bg-red-600 hover:bg-red-700 transition duration-300 px-4 py-2 rounded-lg text-sm font-semibold shadow-lg">
-                                                Delete
-                                            </button>
-
-                                        </form>
-
-                                    </div>
-
-                                </td>
-
-                            </tr>
-
-                        @empty
-
-                            <tr>
-
-                                <td colspan="7" class="text-center py-14 text-slate-500 text-lg">
-                                    🚫 No servers found.
-                                </td>
-
-                            </tr>
-
-                        @endforelse
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-        </div>
-
-        {{-- Pagination --}}
-        <div class="mt-6">
-            {{ $servers->links() }}
-        </div>
-
     </div>
 
     {{-- Alerts --}}
     @if(session('success'))
-        <script>
-            Swal.fire({
-                icon: 'success',
-                title: 'Success',
-                text: '{{ session('success') }}',
-                background: '#0f172a',
-                color: '#fff',
-                timer: 2000,
-                showConfirmButton: false
-            });
-        </script>
+        <div class="alert alert-success">✅ {{ session('success') }}</div>
     @endif
-
     @if(session('error'))
-        <script>
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: '{{ session('error') }}',
-                background: '#0f172a',
-                color: '#fff',
-            });
-        </script>
+        <div class="alert alert-error">❌ {{ session('error') }}</div>
     @endif
 
-</body>
+    {{-- Stats --}}
+    <div class="stats">
+        <div class="card-sm">
+            <div class="stat-label">Total Servers</div>
+            <div class="stat-val" style="color:#818cf8">{{ $totalServers }}</div>
+        </div>
+        <div class="card-sm">
+            <div class="stat-label">Successful</div>
+            <div class="stat-val" style="color:#4ade80">{{ $successCount }}</div>
+        </div>
+        <div class="card-sm">
+            <div class="stat-label">Failed</div>
+            <div class="stat-val" style="color:#f87171">{{ $failedCount }}</div>
+        </div>
+        <div class="card-sm">
+            <div class="stat-label">System</div>
+            <div class="stat-val" style="color:#f472b6;font-size:1.4rem">ONLINE</div>
+        </div>
+    </div>
 
+    {{-- Search --}}
+    <form method="GET" action="{{ route('servers.index') }}">
+        <div class="search-row">
+            <input type="text" name="search" value="{{ $search }}" placeholder="🔍 Search name, host, database...">
+            <select name="tag" style="flex:0;min-width:150px">
+                <option value="">All Tags</option>
+                @foreach($tags as $t)
+                    <option value="{{ $t }}" {{ $tag == $t ? 'selected' : '' }}>{{ $t }}</option>
+                @endforeach
+            </select>
+            <button type="submit" class="btn btn-indigo" style="flex:0">Search</button>
+            @if($search || $tag)
+                <a href="{{ route('servers.index') }}" class="btn btn-slate" style="flex:0">Clear</a>
+            @endif
+        </div>
+    </form>
+
+    {{-- Table --}}
+    <div class="tbl-wrap">
+        <div class="tbl-scroll">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Server</th>
+                        <th>Host</th>
+                        <th>Database</th>
+                        <th>Tag</th>
+                        <th style="text-align:center">Status</th>
+                        <th style="text-align:center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @forelse($servers as $server)
+                @php
+                    $tagMap = ['Production'=>'red','Staging'=>'yellow','Local'=>'blue','Development'=>'purple','Testing'=>'pink'];
+                    $tc = $tagMap[$server->tag] ?? 'slate';
+                @endphp
+                <tr>
+                    <td style="color:#475569">#{{ $server->id }}</td>
+                    <td>
+                        <div class="server-name">{{ $server->name }}</div>
+                        <div class="server-user">{{ $server->username }}</div>
+                    </td>
+                    <td style="color:#cbd5e1">{{ $server->host }}</td>
+                    <td style="color:#cbd5e1">{{ $server->database }}</td>
+                    <td><span class="tag tag-{{ $tc }}">{{ $server->tag }}</span></td>
+                    <td style="text-align:center">
+                        <span class="status-dot" id="st-{{ $server->id }}" onclick="checkStatus({{ $server->id }}, this)" title="Click to check">⏳ Check</span>
+                    </td>
+                    <td>
+                        <div class="actions">
+                            <a href="{{ route('servers.connect', $server->id) }}" class="btn btn-green btn-sm">🔌 Connect</a>
+                            <a href="{{ route('servers.query', $server->id) }}" class="btn btn-blue btn-sm">⚡ Query</a>
+                            <a href="{{ route('servers.edit', $server->id) }}" class="btn btn-yellow btn-sm">✏️ Edit</a>
+                            <form action="{{ route('servers.destroy', $server->id) }}" method="POST" onsubmit="return confirm('Delete {{ addslashes($server->name) }}?')">
+                                @csrf @method('DELETE')
+                                <button type="submit" class="btn btn-red btn-sm">🗑️</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                @empty
+                <tr><td colspan="7" class="empty">🚫 No servers found.</td></tr>
+                @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="pagination">{{ $servers->appends(request()->query())->links() }}</div>
+
+</div>
+
+<script>
+function checkStatus(id, el) {
+    el.textContent = '⏳';
+    el.className = 'status-dot';
+    fetch('/servers/' + id + '/status')
+        .then(r => r.json())
+        .then(d => {
+            el.textContent = d.online ? '● ONLINE' : '● OFFLINE';
+            el.className = 'status-dot ' + (d.online ? 'status-online' : 'status-offline');
+        })
+        .catch(() => { el.textContent = '? ERROR'; });
+}
+</script>
+</body>
 </html>
